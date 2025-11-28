@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Placas - CNL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+        }
+        .card {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: none;
+            border-radius: 10px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 0.5rem 0.75rem;
+        }
+        .card-body {
+            padding: 0.75rem;
+        }
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+        .logo-cnl {
+            height: 35px;
+            width: auto;
+        }
+        .logo-header h3 {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .logo-header small {
+            font-size: 0.65rem;
+            opacity: 0.9;
+        }
+        .history-section {
+            margin-top: 10px;
+        }
+        .cache-badge {
+            background-color: #e5e7eb;
+            color: #6b7280;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            margin-left: 8px;
+            display: inline-block;
+            font-weight: normal;
+        }
+        .table-responsive {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .alert {
+            padding: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+        }
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+        .form-control {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.6rem;
+        }
+        .form-text {
+            font-size: 0.7rem;
+        }
+        .btn {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.75rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #0369a1 100%);
+        }
+        .btn-outline-primary {
+            color: #1e3a8a;
+            border-color: #1e3a8a;
+        }
+        .btn-outline-primary:hover {
+            background-color: #1e3a8a;
+            border-color: #1e3a8a;
+            color: white;
+        }
+        .text-primary {
+            color: #1e3a8a !important;
+        }
+        .alert-success {
+            background-color: #f0f9ff;
+            border-color: #0c4a6e;
+            color: #0c4a6e;
+        }
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+        #resultData h3 {
+            font-size: 1.1rem;
+        }
+        #resultData h4 {
+            font-size: 1rem;
+        }
+        #resultData h5 {
+            font-size: 0.9rem;
+        }
+        #resultData .small {
+            font-size: 0.75rem;
+        }
+        #resultData hr {
+            margin: 0.75rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="logo-header">
+                    <img src="https://novolitoral.com.br/wp-content/themes/trbx-theme/assets/images/logo-header.webp" alt="CNL Logo" class="logo-cnl">
+                    <div>
+                        <h3 class="mb-0">Consulta de Placas</h3>
+                        <small>Concessionária Novo Litoral</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="alertContainer"></div>
+                
+                <div id="consultaForm">
+                    <div class="mb-3">
+                        <label for="tokenInput" class="form-label">Token de Autenticação</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="tokenInput" 
+                            placeholder="Digite seu token de acesso"
+                            autocomplete="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                        >
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="placaInput" class="form-label">Placa do Veículo</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="placaInput" 
+                            placeholder="Ex: ABC1234 ou ABC1D34"
+                            maxlength="7"
+                        >
+                        <div class="form-text">Formato aceito: AAA1234 (antigo) ou AAA1A34 (Mercosul)</div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary w-100" id="consultarBtn">
+                        <span id="btnText">Consultar Placa</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+                
+                <div id="resultContainer" class="d-none">
+                    <div class="alert alert-success" role="alert">
+                        <h5 class="alert-heading" style="font-size: 0.9rem;">
+                            Dados do Veículo
+                            <span id="cacheBadge" class="cache-badge d-none">Consultado em ...</span>
+                        </h5>
+                        <hr style="margin: 0.5rem 0;">
+                        <div id="resultData"></div>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary w-100" id="novaConsultaBtn">
+                        Nova Consulta
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="history-section">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0" style="font-size: 0.85rem;">📋 Histórico</h5>
+                </div>
+                <div class="card-body" style="padding: 0.5rem;">
+                    <div id="historyContainer">
+                        <p class="text-muted text-center mb-0 small">Nenhuma consulta realizada</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Elementos do DOM
+        const consultaForm = document.getElementById('consultaForm');
+        const tokenInput = document.getElementById('tokenInput');
+        const placaInput = document.getElementById('placaInput');
+        const consultarBtn = document.getElementById('consultarBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const alertContainer = document.getElementById('alertContainer');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultData = document.getElementById('resultData');
+        const cacheBadge = document.getElementById('cacheBadge');
+        const historyContainer = document.getElementById('historyContainer');
+        const novaConsultaBtn = document.getElementById('novaConsultaBtn');
+
+        // Validação de placa brasileira
+        function validarPlaca(placa) {
+            const placaAntiga = /^[A-Z]{3}[0-9]{4}$/;
+            const placaMercosul = /^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$/;
+            const placaUpper = placa.toUpperCase();
+            return placaAntiga.test(placaUpper) || placaMercosul.test(placaUpper);
+        }
+
+        // Exibir alerta de erro
+        function mostrarErro(mensagem) {
+            alertContainer.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Erro!</strong> ${mensagem}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Chamar API oficial (sempre usa proxy CORS)
+        async function fetchPlaca(placa, token) {
+            const apiUrl = `https://apiplate.pumatronix.com/api/plates/${placa}`;
+            const url = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Token Inválido ou não autorizado');
+                    } else if (response.status === 404) {
+                        throw new Error('Veículo não encontrado');
+                    } else if (response.status === 429) {
+                        throw new Error('Limite de requisições excedido. Tente novamente mais tarde.');
+                    } else if (response.status === 500) {
+                        throw new Error('Erro no servidor. Tente novamente mais tarde.');
+                    } else {
+                        throw new Error(`Erro na requisição: ${response.status}`);
+                    }
+                }
+
+                const data = await response.json();
+                
+                // Normalizar resposta da API para o formato interno
+                return {
+                    placa: data.placa,
+                    modelo: data.modelo,
+                    ano: data.ano,
+                    anoModelo: data.anoModelo,
+                    cor: data.cor,
+                    fabricante: data.marca,
+                    municipio: data.municipio,
+                    uf: data.uf,
+                    chassi: data.chassi,
+                    segmento: data.extra?.segmento || 'N/A',
+                    subSegmento: data.extra?.subSegmento || 'N/A',
+                    tipo: placa.length === 7 && /[A-Z]/.test(placa[4]) ? 'Mercosul' : 'Antigo'
+                };
+            } catch (error) {
+                // Detectar erros de rede/DNS/CORS
+                if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                    throw new Error('Erro de conexão com a API. Verifique sua internet ou tente novamente mais tarde.');
+                }
+                throw error;
+            }
+        }
+
+        // Gerenciamento de cache
+        function obterDoCache(placa) {
+            const historico = JSON.parse(localStorage.getItem('historicoConsultas') || '[]');
+            const consultas = historico.filter(item => item.placa.toUpperCase() === placa.toUpperCase());
+            
+            if (consultas.length === 0) return null;
+            
+            return {
+                ...consultas[0],
+                totalConsultas: consultas.length,
+                primeiraConsulta: consultas[consultas.length - 1].dataConsulta
+            };
+        }
+
+        function salvarNoCache(dadosVeiculo) {
+            let historico = JSON.parse(localStorage.getItem('historicoConsultas') || '[]');
+            
+            // Adicionar novo registro no início
+            historico.unshift({
+                ...dadosVeiculo,
+                dataConsulta: new Date().toISOString()
+            });
+            
+            localStorage.setItem('historicoConsultas', JSON.stringify(historico));
+            atualizarHistorico();
+        }
+
+        // Exibir resultado
+        function exibirResultado(dados, ehCache = false) {
+            resultData.innerHTML = `
+                <div class="text-center mb-2">
+                    <h3 class="mb-1 text-primary fw-bold">${dados.placa}</h3>
+                    <h4 class="mb-1">${dados.fabricante} ${dados.modelo}</h4>
+                    <h5 class="text-muted">${dados.cor} • ${dados.ano}</h5>
+                </div>
+                <hr class="my-2">
+                <div class="row small text-muted">
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Ano Modelo:</strong> ${dados.anoModelo || dados.ano}</p>
+                        <p class="mb-1"><strong>Município:</strong> ${dados.municipio || 'N/A'}</p>
+                        <p class="mb-1"><strong>UF:</strong> ${dados.uf || 'N/A'}</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Tipo:</strong> ${dados.tipo}</p>
+                        ${dados.segmento && dados.segmento !== 'N/A' ? `<p class="mb-1"><strong>Segmento:</strong> ${dados.segmento}</p>` : ''}
+                        ${dados.chassi ? `<p class="mb-1"><strong>Chassi:</strong> ${dados.chassi}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            if (ehCache) {
+                const primeiraConsultaFormatada = new Date(dados.primeiraConsulta).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                cacheBadge.textContent = `Consultado em ${primeiraConsultaFormatada}`;
+                cacheBadge.classList.remove('d-none');
+            } else {
+                cacheBadge.classList.add('d-none');
+            }
+            
+            // Ocultar formulário e mostrar resultado
+            consultaForm.classList.add('d-none');
+            resultContainer.classList.remove('d-none');
+        }
+
+        // Atualizar histórico visual
+        function atualizarHistorico() {
+            const historico = JSON.parse(localStorage.getItem('historicoConsultas') || '[]');
+            
+            if (historico.length === 0) {
+                historyContainer.innerHTML = '<p class="text-muted text-center mb-0 small">Nenhuma consulta realizada</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="font-size: 0.85rem;">Placa</th>
+                                <th style="font-size: 0.85rem;">Marca</th>
+                                <th style="font-size: 0.85rem;">Modelo</th>
+                                <th style="font-size: 0.85rem;">Cor</th>
+                                <th style="font-size: 0.85rem;">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 0.8rem;">
+                            ${historico.map(item => `
+                                <tr>
+                                    <td><strong>${item.placa}</strong></td>
+                                    <td>${item.fabricante}</td>
+                                    <td>${item.modelo}</td>
+                                    <td>${item.cor}</td>
+                                    <td>${new Date(item.dataConsulta).toLocaleString('pt-BR', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Manipular clique no botão
+        consultarBtn.addEventListener('click', async () => {
+            const token = tokenInput.value.trim();
+            const placa = placaInput.value.trim().toUpperCase();
+            
+            console.log('Iniciando consulta...', { token, placa });
+            
+            // Validar placa
+            if (!validarPlaca(placa)) {
+                mostrarErro('Placa inválida! Use o formato AAA1234 ou AAA1A34.');
+                return;
+            }
+            
+            // Verificar cache
+            const dadosCache = obterDoCache(placa);
+            if (dadosCache) {
+                console.log('Dados encontrados no cache:', dadosCache);
+                exibirResultado(dadosCache, true);
+                return;
+            }
+            
+            console.log('Cache não encontrado, consultando API...');
+            
+            // Ativar loading
+            consultarBtn.disabled = true;
+            btnText.classList.add('d-none');
+            btnSpinner.classList.remove('d-none');
+            alertContainer.innerHTML = '';
+            
+            try {
+                const dados = await fetchPlaca(placa, token);
+                console.log('Dados recebidos da API:', dados);
+                exibirResultado(dados, false);
+                salvarNoCache(dados);
+            } catch (error) {
+                console.error('Erro na consulta:', error);
+                mostrarErro(error.message);
+            } finally {
+                // Desativar loading
+                consultarBtn.disabled = false;
+                btnText.classList.remove('d-none');
+                btnSpinner.classList.add('d-none');
+            }
+        });
+        
+        // Permitir Enter nos campos de input
+        [tokenInput, placaInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    consultarBtn.click();
+                }
+            });
+        });
+
+        // Botão Nova Consulta
+        novaConsultaBtn.addEventListener('click', () => {
+            resultContainer.classList.add('d-none');
+            consultaForm.classList.remove('d-none');
+            placaInput.value = '';
+            placaInput.focus();
+        });
+        
+        // Carregar histórico ao iniciar
+        atualizarHistorico();
+    </script>
+</body>
+</html>
