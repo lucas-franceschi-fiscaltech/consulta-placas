@@ -137,7 +137,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="logo-header">
-                    <img src="https://novolitoral.com.br/wp-content/themes/trbx-theme/assets/images/logo-header.webp" alt="CNL Logo" class="logo-cnl">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/bb/Logo_Concession%C3%A1ria_Novo_Litoral_-_CNL.jpg" alt="CNL Logo" class="logo-cnl">
                     <div>
                         <h3 class="mb-0">Consulta de Placas</h3>
                         <small>Concessionária Novo Litoral</small>
@@ -276,19 +276,21 @@
 
                 const data = await response.json();
                 
+                console.log('Resposta da API:', data);
+                
                 // Normalizar resposta da API para o formato interno
                 return {
-                    placa: data.placa,
-                    modelo: data.modelo,
-                    ano: data.ano,
-                    anoModelo: data.anoModelo,
-                    cor: data.cor,
-                    fabricante: data.marca,
-                    municipio: data.municipio,
-                    uf: data.uf,
-                    chassi: data.chassi,
-                    segmento: data.extra?.segmento || 'N/A',
-                    subSegmento: data.extra?.subSegmento || 'N/A',
+                    placa: data.placa || placa,
+                    modelo: data.modelo || data.MODELO || 'N/A',
+                    ano: data.ano || data.ANO || data.anoFabricacao || 'N/A',
+                    anoModelo: data.anoModelo || data.ANO_MODELO || data.ano || data.ANO || 'N/A',
+                    cor: data.cor || data.COR || 'N/A',
+                    fabricante: data.marca || data.MARCA || data.fabricante || 'N/A',
+                    municipio: data.municipio || data.MUNICIPIO || 'N/A',
+                    uf: data.uf || data.UF || 'N/A',
+                    chassi: data.chassi || data.CHASSI || '',
+                    segmento: data.extra?.segmento || data.segmento || 'N/A',
+                    subSegmento: data.extra?.subSegmento || data.subSegmento || 'N/A',
                     tipo: placa.length === 7 && /[A-Z]/.test(placa[4]) ? 'Mercosul' : 'Antigo'
                 };
             } catch (error) {
