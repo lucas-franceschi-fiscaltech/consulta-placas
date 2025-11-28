@@ -10,6 +10,7 @@
             background: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 5px;
@@ -139,6 +140,25 @@
         #resultData hr {
             margin: 0.75rem 0;
         }
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            width: 100%;
+        }
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -217,7 +237,7 @@
             </div>
         </div>
 
-         <div class="footer">
+        <div class="footer">
             Desenvolvido por: <a href="https://fiscaltech.com.br" target="_blank" rel="noopener noreferrer">Fiscaltech</a>
         </div>
     </div>
@@ -292,18 +312,19 @@
                 console.log('Resposta da API:', data);
                 
                 // Normalizar resposta da API para o formato interno
+                // A API retorna: placa, MARCA, MODELO, cor, anoModelo, municipio, uf, chassi, segmento, sub_segmento
                 return {
                     placa: data.placa || placa,
-                    modelo: data.modelo || data.MODELO || 'N/A',
-                    ano: data.ano || data.ANO || data.anoFabricacao || data.anoModelo || 'N/A',
-                    anoModelo: data.anoModelo || data.ANO_MODELO || data.ano || data.ANO || 'N/A',
-                    cor: data.cor || data.COR || 'N/A',
-                    fabricante: data.marca || data.MARCA || data.fabricante || 'N/A',
-                    municipio: data.municipio || data.MUNICIPIO || 'N/A',
-                    uf: data.uf || data.UF || 'N/A',
-                    chassi: data.chassi || data.CHASSI || '',
-                    segmento: data.extra?.segmento || data.segmento || 'N/A',
-                    subSegmento: data.extra?.subSegmento || data.subSegmento || 'N/A',
+                    fabricante: data.MARCA || data.marca || 'N/A',
+                    modelo: data.MODELO || data.modelo || 'N/A',
+                    cor: data.cor || 'N/A',
+                    ano: data.anoModelo || 'N/A',
+                    anoModelo: data.anoModelo || 'N/A',
+                    municipio: data.municipio || 'N/A',
+                    uf: data.uf || 'N/A',
+                    chassi: data.chassi || '',
+                    segmento: data.segmento || 'N/A',
+                    subSegmento: data.sub_segmento || 'N/A',
                     tipo: placa.length === 7 && /[A-Z]/.test(placa[4]) ? 'Mercosul' : 'Antigo'
                 };
             } catch (error) {
