@@ -104,6 +104,15 @@
             border-color: #1e3a8a;
             color: white;
         }
+        .btn-outline-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
         .text-primary {
             color: #1e3a8a !important;
         }
@@ -389,10 +398,11 @@
                                 <th style="font-size: 0.85rem;">Modelo</th>
                                 <th style="font-size: 0.85rem;">Cor</th>
                                 <th style="font-size: 0.85rem;">Data</th>
+                                <th style="font-size: 0.85rem; width: 40px;"></th>
                             </tr>
                         </thead>
                         <tbody style="font-size: 0.8rem;">
-                            ${historico.map(item => `
+                            ${historico.map((item, index) => `
                                 <tr>
                                     <td><strong>${item.placa}</strong></td>
                                     <td>${item.fabricante}</td>
@@ -404,12 +414,25 @@
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger p-0" style="width: 28px; height: 24px; font-size: 0.7rem;" onclick="deletarRegistro(${index})" title="Remover">
+                                            ×
+                                        </button>
+                                    </td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
             `;
+        }
+
+        // Deletar um registro específico do histórico
+        function deletarRegistro(index) {
+            let historico = JSON.parse(localStorage.getItem('historicoConsultas') || '[]');
+            historico.splice(index, 1);
+            localStorage.setItem('historicoConsultas', JSON.stringify(historico));
+            atualizarHistorico();
         }
 
         // Manipular clique no botão
